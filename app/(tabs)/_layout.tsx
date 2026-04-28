@@ -1,39 +1,53 @@
 import { Tabs } from "expo-router";
-
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#ffd33d",
+        // This line hides the header for all screens in the tab bar
+        headerShown: false,
+
+        tabBarStyle: {
+          backgroundColor: Colors.background,
+          borderTopColor: Colors.border,
+          height: 65,
+          paddingBottom: 10,
+        },
+        tabBarActiveTintColor: Colors.primaryMuted,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "700",
+          textTransform: "uppercase",
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "home-sharp" : "home-outline"}
-              color={color}
-              size={24}
-            />
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="grid-view" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="about"
         options={{
-          title: "About",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={
-                focused ? "information-circle" : "information-circle-outline"
-              }
-              color={color}
-              size={24}
-            />
+          tabBarLabel: "Discover",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="explore" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarLabel: "Settings",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="settings" size={24} color={color} />
           ),
         }}
       />
