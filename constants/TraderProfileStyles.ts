@@ -66,15 +66,6 @@ export const ProfileStyles = StyleSheet.create({
     color: Colors.secondary,
     opacity: 0.6,
   },
-  unitFooter: {
-    width: "100%",
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: 24,
-    justifyContent: "center",
-    gap: 20,
-  },
   footerItem: {
     alignItems: "center",
     paddingHorizontal: 16,
@@ -183,5 +174,46 @@ export const ProfileStyles = StyleSheet.create({
     padding: 12,
     fontSize: 18,
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  },
+  unitFooter: {
+    width: "100%",
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: 24,
+    justifyContent: "space-between", // Changed to handle 3 items
+  },
+  followerProfitSection: {
+    marginTop: 24,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    alignItems: "center",
+  },
+  followerProfitValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: Colors.secondary,
+    letterSpacing: -0.5,
+  },
+  // Table Row Grid (3 Columns)
+  tableRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1A1A1A",
+  },
+  colLeft: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  colCenter: {
+    flex: 1,
+    alignItems: "center",
+  },
+  colRight: {
+    flex: 1,
+    alignItems: "flex-end",
   },
 });

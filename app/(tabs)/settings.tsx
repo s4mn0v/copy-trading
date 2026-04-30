@@ -212,7 +212,7 @@ export default function SettingsScreen() {
                       leverageType === "trader" && styles.modeTextActive,
                     ]}
                   >
-                    Trader's Leverage
+                    Trader`s Leverage
                   </Text>
                 </TouchableOpacity>
               </View>

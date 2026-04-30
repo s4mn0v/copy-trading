@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { TradersStyles } from "../constants/TradersStyles";
 import { Colors } from "@/constants/Colors";
 import { useRouter } from "expo-router";
@@ -9,7 +9,8 @@ interface TraderProps {
   id: string;
   roi: string;
   drawdown: string;
-  isWhale: boolean;
+  profit: string;
+  spots: string;
   type: "LONG" | "SHORT";
 }
 
@@ -17,37 +18,38 @@ export const TraderCard = ({
   id,
   roi,
   drawdown,
-  isWhale,
+  profit,
+  spots,
   type,
 }: TraderProps) => {
-  // Define dynamic colors based on type
-  const typeColor = type === "LONG" ? "#4edea3" : "#ffb3ad";
-  const typeBg =
-    type === "LONG" ? "rgba(0, 165, 114, 0.1)" : "rgba(255, 84, 81, 0.1)";
-  const typeBorder =
-    type === "LONG" ? "rgba(78, 222, 163, 0.2)" : "rgba(255, 179, 173, 0.2)";
   const router = useRouter();
+
+  const isLong = type === "LONG";
+  const typeColor = isLong ? Colors.secondary : Colors.error;
+  const typeBg = isLong ? "rgba(0, 165, 114, 0.1)" : "rgba(255, 180, 171, 0.1)";
 
   return (
     <View style={TradersStyles.card}>
       {/* Header */}
       <View style={TradersStyles.header}>
         <View style={TradersStyles.idSection}>
+          <View style={TradersStyles.avatarBox}>
+            <MaterialIcons name="account-circle" size={24} color="#8b90a0" />
+          </View>
           <View>
             <Text style={TradersStyles.labelCaps}>Trader ID</Text>
             <Text style={TradersStyles.traderId}>{id}</Text>
           </View>
         </View>
 
-        {/* Replaced Whale badge with Long/Short Badge */}
         <View
           style={[
             TradersStyles.badge,
-            { backgroundColor: typeBg, borderColor: typeBorder },
+            { backgroundColor: typeBg, borderColor: `${typeColor}33` },
           ]}
         >
           <MaterialIcons
-            name={type === "LONG" ? "trending-up" : "trending-down"}
+            name={isLong ? "trending-up" : "trending-down"}
             size={14}
             color={typeColor}
           />
@@ -57,31 +59,44 @@ export const TraderCard = ({
         </View>
       </View>
 
-      {/* Stats */}
+      {/* Follower Profit Row */}
+      <View style={TradersStyles.profitRow}>
+        <Text style={TradersStyles.labelCaps}>Follower Total Profit</Text>
+        <Text style={TradersStyles.profitValue}>+{profit} USDT</Text>
+      </View>
+
+      {/* Stats Grid */}
       <View style={TradersStyles.statsGrid}>
         <View>
           <Text style={TradersStyles.labelCaps}>ROI (30D)</Text>
-          <Text style={TradersStyles.statValueROI}>{roi}</Text>
+          <Text style={[TradersStyles.statValue, { color: Colors.secondary }]}>
+            {roi}
+          </Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Text style={TradersStyles.labelCaps}>Max Drawdown</Text>
-          <Text style={TradersStyles.statValueDD}>{drawdown}</Text>
+          <Text style={[TradersStyles.statValue, { color: Colors.error }]}>
+            {drawdown}
+          </Text>
         </View>
       </View>
 
-      <View style={TradersStyles.divider} />
+      {/* FIXED LINE: Use TradersStyles instead of styles */}
+      <Text style={TradersStyles.spotsText}>{spots}</Text>
 
+      {/* Footer Buttons */}
       <View style={TradersStyles.buttonRow}>
         <TouchableOpacity
-          style={TradersStyles.secondaryButton}
-          activeOpacity={0.7}
+          style={TradersStyles.detailsButton}
           onPress={() => router.push(`/trader/${id}`)}
         >
-          <Text style={TradersStyles.secondaryButtonText}>DETAILS</Text>
+          <MaterialIcons name="visibility" size={16} color="#FFF" />
+          <Text style={TradersStyles.buttonText}>DETAILS</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={TradersStyles.copyButton} activeOpacity={0.8}>
-          <Ionicons name="copy-outline" size={16} color={Colors.background} />
-          <Text style={TradersStyles.copyButtonText}>COPY</Text>
+
+        <TouchableOpacity style={TradersStyles.copyButton}>
+          <MaterialIcons name="add" size={18} color="#FFF" />
+          <Text style={TradersStyles.buttonText}>COPY</Text>
         </TouchableOpacity>
       </View>
     </View>
