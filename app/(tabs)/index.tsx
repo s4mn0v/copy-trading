@@ -1,76 +1,135 @@
-import React, { useState } from "react";
-import { FlatList, View, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  FlatList,
+  View,
+  Text,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { GlobalStyles as Styles } from "../../constants/GlobalStyles";
 import { TraderCard } from "../../components/TraderCard";
 import { DotBackground } from "@/components/DotBackground";
+import { Colors } from "@/constants/Colors";
 import Dropdown, { DropdownOption } from "@/components/Dropdown";
 
-const TRADERS_DATA = [
-  {
-    id: "TR-882",
-    roi: "+85.2%",
-    drawdown: "-4.2%",
-    profit: "12,450.00",
-    spots: "240 / 300 Spots Available",
-    type: "LONG" as const,
-  },
-  {
-    id: "TR-991",
-    roi: "+112.4%",
-    drawdown: "-8.7%",
-    profit: "45,820.50",
-    spots: "156 / 200 Spots Available",
-    type: "LONG" as const,
-  },
-  {
-    id: "TR-105",
-    roi: "+64.9%",
-    drawdown: "-1.2%",
-    profit: "8,120.25",
-    spots: "Capacity Full",
-    type: "SHORT" as const,
-  },
-  {
-    id: "TR-202",
-    roi: "+14.2%",
-    drawdown: "-0.8%",
-    profit: "2,440.00",
-    spots: "45 / 500 Spots Available",
-    type: "LONG" as const,
-  },
-];
+const API_URL = "http://localhost:8080/api/v2/traders/list";
 
 const FILTER_OPTIONS: DropdownOption[] = [
-  { label: "BEST ROI", value: "roi" },
-  { label: "LOWEST RISK", value: "risk" },
+  { label: "BEST ROI", value: "ROI" },
+  { label: "LOWEST RISK", value: "MDD" },
 ];
 
+interface MappedTrader {
+  id: string;
+  roi: string;
+  drawdown: string;
+  profit: string;
+  spots: string;
+  type: "LONG" | "SHORT";
+}
+
 export default function HomeScreen() {
-  const [filter, setFilter] = useState("roi");
+  const [traders, setTraders] = useState<MappedTrader[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState("ROI");
+
+  const fetchTraders = async () => {
+    try {
+      const response = await fetch(`${API_URL}?pageSize=10&pageNo=1`);
+      const json = await response.json();
+
+      if (json.code === "00000") {
+        const mappedData = json.data.map((item: any) => {
+          const roiData = item.columnList.find(
+            (c: any) => c.describe === "ROI",
+          );
+          const mddData = item.columnList.find(
+            (c: any) => c.describe === "MDD",
+          );
+
+          return {
+            id: item.traderName,
+            roi: roiData ? `+${roiData.value}%` : "0%",
+            drawdown: mddData ? `-${mddData.value}%` : "0%",
+            profit: parseFloat(item.followerTotalProfit).toLocaleString(
+              undefined,
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              },
+            ),
+            spots:
+              parseInt(item.followCount) >= parseInt(item.maxLimit)
+                ? "Capacity Full"
+                : `${item.followCount} / ${item.maxLimit} Spots Available`,
+            type: "LONG", // Defaulting to LONG if the API doesn't specify global bias
+          };
+        });
+
+        setTraders(mappedData);
+      }
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTraders();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchTraders();
+  };
 
   return (
     <View style={Styles.container}>
       <DotBackground />
       <View style={Styles.content}>
         <FlatList
-          data={TRADERS_DATA}
+          data={traders}
           keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={Colors.primary}
+            />
+          }
           ListHeaderComponent={() => (
-            <View>
+            <View style={{ marginBottom: 24, marginTop: 20 }}>
               <Text style={Styles.label}>Scanner Engine</Text>
               <Text style={Styles.title}>Discover Traders</Text>
-
-              {/* NATIVE PICKER CONTAINER */}
               <Dropdown
-                style={{ marginVertical: 20 }}
                 options={FILTER_OPTIONS}
                 selectedValue={filter}
                 onSelect={(val) => setFilter(val)}
                 placeholder="SORT BY"
+                style={{ marginVertical: 20 }}
               />
             </View>
           )}
           renderItem={({ item }) => <TraderCard {...item} />}
+          ListEmptyComponent={() =>
+            !loading ? (
+              <Text
+                style={{ color: "#8b90a0", textAlign: "center", marginTop: 40 }}
+              >
+                No traders found.
+              </Text>
+            ) : (
+              <ActivityIndicator
+                color={Colors.primary}
+                size="large"
+                style={{ marginTop: 40 }}
+              />
+            )
+          }
         />
       </View>
     </View>
